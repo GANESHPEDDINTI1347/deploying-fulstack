@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+
+<script src="script.js"></script>
+<script>
+window.onload = function () {
+    checkAccess("admin");
+    loadStats();
+    loadStudents();
+};
+</script>
+
+<nav class="navbar navbar-dark bg-dark">
+    <div class="container-fluid">
+        <span class="navbar-brand">Admin Panel</span>
+        <button onclick="logout()" class="btn btn-danger">Logout</button>
+    </div>
+</nav>
+
+<div class="container mt-4">
+
+    <!-- Analytics Cards -->
+    <div class="row mb-4">
+
+        <div class="col-md-4">
+            <div class="card text-center shadow p-3">
+                <h5>Total Students</h5>
+                <h2 id="totalStudents">--</h2>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card text-center shadow p-3">
+                <h5>Total Staff</h5>
+                <h2 id="totalStaff">--</h2>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card text-center shadow p-3">
+                <h5>Average Attendance</h5>
+                <h2 id="avgAttendance">--</h2>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Staff Creation -->
+    <h3>Create Staff Account</h3>
+
+    <input id="staffUsername" class="form-control mb-2" placeholder="Staff Username">
+    <input id="staffPassword" type="password" class="form-control mb-2" placeholder="Password">
+
+    <button onclick="createStaff()" class="btn btn-primary">
+        Create Staff
+    </button>
+
+    <p id="msg" class="mt-3"></p>
+
+    <hr>
+
+    <!-- Student List -->
+    <h3 class="mt-4">All Students</h3>
+
+    <input
+  type="text"
+  id="searchInput"
+  class="form-control mb-3"
+  placeholder="Search student by name..."
+  onkeyup="searchStudent()"
+/>
+
+
+<div class="table-responsive">
+ <table class="table table-bordered">
+
+<thead>
+<tr>
+<th>ID</th>
+<th>Name</th>
+<th>Attendance</th>
+<th>Marks</th>
+<th>Action</th>
+</tr>
+</thead>
+
+    <tbody id="studentTable"></tbody>
+    </table>
+</div>
+</div>
+
+<script>
+async function createStaff() {
+    const username = document.getElementById("staffUsername").value;
+    const password = document.getElementById("staffPassword").value;
+
+    const res = await fetch("https://backend-deployment-1-5kgv.onrender.com/createStaff", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+    });
+
+    const data = await res.json();
+    document.getElementById("msg").innerText = data.message;
+}
+
+let allStudents = [];
+
+async function loadStudents() {
+    const res = await fetch("https://backend-deployment-1-5kgv.onrender.com/students");
+    allStudents = await res.json();
+
+    displayStudents(allStudents);
+}
+
+function displayStudents(students) {
+    const table = document.getElementById("studentTable");
+    table.innerHTML = "";
+
+    students.forEach(s => {
+        const marksText = Object.entries(s.marks || {})
+            .map(([sub, m]) => `${sub}: ${m}`)
+            .join(", ");
+
+        table.innerHTML += `
+            <tr>
+                <td>${s.id}</td>
+                <td>${s.name}</td>
+                <td>${s.attendance}</td>
+                <td>${marksText}</td>
+                <td>
+                    <button class="btn btn-danger btn-sm"
+                        onclick="deleteStudent(${s.id})">
+                        Delete
+                    </button>
+                </td>
+            </tr>`;
+    });
+}
+
+
+async function deleteStudent(id) {
+
+    if (!confirm("Delete this student?")) return;
+
+    await fetch(`https://backend-deployment-1-5kgv.onrender.com/deleteStudent/${id}`, {
+        method: "DELETE"
+    });
+
+    loadStudents();
+    loadStats();
+}
+
+
+function searchStudent() {
+    const value = document
+        .getElementById("searchInput")
+        .value
+        .toLowerCase();
+
+    const filtered = allStudents.filter(s =>
+        s.name.toLowerCase().includes(value)
+    );
+
+    displayStudents(filtered);
+}
+
+
+async function loadStats() {
+    const res = await fetch("https://backend-deployment-1-5kgv.onrender.com/adminStats");
+    const stats = await res.json();
+
+    document.getElementById("totalStudents").innerText =
+        stats.totalStudents;
+
+    document.getElementById("totalStaff").innerText =
+        stats.totalStaff;
+
+    document.getElementById("avgAttendance").innerText =
+        stats.avgAttendance + "%";
+}
+</script>
+
+</body>
+</html>

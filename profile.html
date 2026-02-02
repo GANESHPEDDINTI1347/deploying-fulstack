@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Profile</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+
+<script src="script.js"></script>
+<script>
+window.onload = function () {
+    checkAccess("student");
+    loadProfile();
+};
+</script>
+
+<nav class="navbar navbar-dark bg-dark">
+    <div class="container-fluid">
+        <span class="navbar-brand">Student Profile</span>
+        <div>
+            <a href="dashboard.html" class="btn btn-warning me-2">Dashboard</a>
+            <button onclick="logout()" class="btn btn-danger">Logout</button>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-5">
+    <div class="card shadow p-4">
+        <h3 class="text-center mb-4">Student Details</h3>
+
+        <p><strong>Name:</strong> <span id="name"></span></p>
+        <p><strong>Attendance:</strong> <span id="attendance"></span></p>
+
+        <h5>Marks</h5>
+        <ul id="marks" class="list-group"></ul>
+    </div>
+</div>
+
+<script>
+async function loadProfile() {
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    const res = await fetch(`https://backend-deployment-1-5kgv.onrender.com/student/${user.studentId || user.id}`);
+    const data = await res.json();
+
+    document.getElementById("name").innerText = data.name;
+    document.getElementById("attendance").innerText = data.attendance;
+
+    const marksList = document.getElementById("marks");
+    marksList.innerHTML = "";
+
+    for (let subject in data.marks) {
+        const li = document.createElement("li");
+        li.className = "list-group-item";
+        li.innerText = subject + " : " + data.marks[subject];
+        marksList.appendChild(li);
+    }
+}
+</script>
+
+</body>
+</html>

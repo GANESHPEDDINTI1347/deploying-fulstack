@@ -1,0 +1,89 @@
+/* ============================= */
+/* Large Screens (Desktops) */
+/* ============================= */
+@media (min-width: 1200px) {
+  .content {
+    margin-left: 240px;
+  }
+}
+
+/* ============================= */
+/* Medium Screens (Tablets) */
+/* ============================= */
+@media (max-width: 992px) {
+
+  /* Sidebar smaller */
+  .sidebar {
+    width: 200px;
+  }
+
+  .content {
+    margin-left: 200px;
+  }
+
+  /* Dashboard cards smaller */
+  .dashboard-card h2 {
+    font-size: 22px;
+  }
+
+  /* Carousel height */
+  .carousel-item img {
+    height: 300px;
+  }
+}
+
+/* ============================= */
+/* Small Screens (Mobile) */
+/* ============================= */
+@media (max-width: 768px) {
+
+  /* Hide sidebar */
+  .sidebar {
+    position: fixed;
+    left: -240px;
+    transition: 0.3s;
+  }
+
+  .sidebar.active {
+    left: 0;
+  }
+
+  /* Content full width */
+  .content {
+    margin-left: 0;
+  }
+
+  /* Navbar spacing */
+  .topbar {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* Cards stack nicely */
+  .dashboard-card {
+    text-align: center;
+  }
+
+  /* Carousel height smaller */
+  .carousel-item img {
+    height: 220px;
+  }
+}
+
+/* ============================= */
+/* Extra Small Devices */
+/* ============================= */
+@media (max-width: 480px) {
+
+  .dashboard-card h5 {
+    font-size: 16px;
+  }
+
+  .dashboard-card h2 {
+    font-size: 18px;
+  }
+
+  .profile-box {
+    padding: 15px;
+  }
+}

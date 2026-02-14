@@ -3,7 +3,6 @@
 ================================ */
 const API_BASE = "https://backend-deployment-11.onrender.com";
 
-
 /* ================================
    LOGIN
 ================================ */
@@ -32,14 +31,12 @@ async function login() {
 
     localStorage.setItem("user", JSON.stringify(data.user));
 
-    // Role redirect
-    if (data.user.role === "staff") {
+    if (data.user.role === "staff")
       window.location.href = "staff.html";
-    } else if (data.user.role === "admin") {
+    else if (data.user.role === "admin")
       window.location.href = "admin.html";
-    } else {
+    else
       window.location.href = "dashboard.html";
-    }
 
   } catch {
     alert("Server error. Try again later.");
@@ -89,7 +86,53 @@ async function register() {
 }
 
 /* ================================
-   CSV Upload (Admin/Staff)
+   LOAD STUDENT DASHBOARD DATA
+================================ */
+async function loadStudent() {
+  const user = JSON.parse(localStorage.getItem("user"));
+  if (!user) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/student/${user.studentid}`);
+    const data = await res.json();
+
+    const nameBox = document.getElementById("studentName");
+    if (nameBox) nameBox.innerText = data.name;
+
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+/* ================================
+   LOAD STUDENTS (ADMIN PANEL)
+================================ */
+async function loadStudents() {
+  const table = document.getElementById("studentsTable");
+  if (!table) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/students`);
+    const students = await res.json();
+
+    table.innerHTML = "";
+
+    students.forEach(s => {
+      table.innerHTML += `
+        <tr>
+          <td>${s.id}</td>
+          <td>${s.name}</td>
+          <td>${s.attendance}</td>
+        </tr>`;
+    });
+
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+/* ================================
+   CSV Upload
 ================================ */
 async function uploadCSV() {
   const fileInput = document.getElementById("csvFile");
@@ -111,8 +154,8 @@ async function uploadCSV() {
     });
 
     const data = await res.json();
-
     const msgBox = document.getElementById("uploadMsg");
+
     if (msgBox) msgBox.innerText = data.message;
 
   } catch {
@@ -131,7 +174,7 @@ function checkAccess(requiredRole) {
     return;
   }
 
-  if (user.role !== requiredRole) {
+  if (requiredRole && user.role !== requiredRole) {
     alert("Access denied");
     window.location.href = "login.html";
   }

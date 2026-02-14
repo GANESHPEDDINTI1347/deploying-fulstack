@@ -9,6 +9,7 @@
 <body>
 
 <script src="script.js"></script>
+
 <script>
 window.onload = function () {
     checkAccess("admin");
@@ -28,7 +29,6 @@ window.onload = function () {
 
     <!-- Analytics Cards -->
     <div class="row mb-4">
-
         <div class="col-md-4">
             <div class="card text-center shadow p-3">
                 <h5>Total Students</h5>
@@ -49,7 +49,6 @@ window.onload = function () {
                 <h2 id="avgAttendance">--</h2>
             </div>
         </div>
-
     </div>
 
     <!-- Staff Creation -->
@@ -88,7 +87,6 @@ window.onload = function () {
                     <th>Action</th>
                 </tr>
             </thead>
-
             <tbody id="studentTable"></tbody>
         </table>
     </div>
@@ -100,56 +98,48 @@ let allStudents = [];
 
 /* ---------- Create Staff ---------- */
 async function createStaff() {
-    const username = document.getElementById("staffUsername").value.trim();
-    const password = document.getElementById("staffPassword").value.trim();
+    const username = staffUsername.value.trim();
+    const password = staffPassword.value.trim();
 
     if (!username || !password) {
         alert("Enter username and password");
         return;
     }
 
-    const res = await fetch(
-        "https://backend-deployment-1-5kgv.onrender.com/createStaff",
-        {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username, password })
-        }
-    );
+    const res = await fetch(`${API_BASE}/createStaff`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+    });
 
     const data = await res.json();
-    document.getElementById("msg").innerText = data.message;
+    msg.innerText = data.message;
 
-    document.getElementById("staffUsername").value = "";
-    document.getElementById("staffPassword").value = "";
+    staffUsername.value = "";
+    staffPassword.value = "";
 }
 
 /* ---------- Load Students ---------- */
 async function loadStudents() {
-    const res = await fetch(
-        "https://backend-deployment-1-5kgv.onrender.com/students"
-    );
-
-    if (!res.ok) {
+    try {
+        const res = await fetch(`${API_BASE}/students`);
+        allStudents = await res.json();
+        displayStudents(allStudents);
+    } catch {
         alert("Failed to load students");
-        return;
     }
-
-    allStudents = await res.json();
-    displayStudents(allStudents);
 }
 
 /* ---------- Display Students ---------- */
 function displayStudents(students) {
-    const table = document.getElementById("studentTable");
-    table.innerHTML = "";
+    studentTable.innerHTML = "";
 
     students.forEach(s => {
         const marksText = Object.entries(s.marks ?? {})
             .map(([sub, m]) => `${sub}: ${m}`)
             .join(", ");
 
-        table.innerHTML += `
+        studentTable.innerHTML += `
             <tr>
                 <td>${s.id}</td>
                 <td>${s.name}</td>
@@ -169,10 +159,9 @@ function displayStudents(students) {
 async function deleteStudent(id) {
     if (!confirm("Delete this student?")) return;
 
-    await fetch(
-        `https://backend-deployment-1-5kgv.onrender.com/deleteStudent/${id}`,
-        { method: "DELETE" }
-    );
+    await fetch(`${API_BASE}/deleteStudent/${id}`, {
+        method: "DELETE"
+    });
 
     loadStudents();
     loadStats();
@@ -180,10 +169,7 @@ async function deleteStudent(id) {
 
 /* ---------- Search ---------- */
 function searchStudent() {
-    const value = document
-        .getElementById("searchInput")
-        .value
-        .toLowerCase();
+    const value = searchInput.value.toLowerCase();
 
     const filtered = allStudents.filter(s =>
         s.name.toLowerCase().includes(value)
@@ -194,20 +180,12 @@ function searchStudent() {
 
 /* ---------- Admin Stats ---------- */
 async function loadStats() {
-    const res = await fetch(
-        "https://backend-deployment-1-5kgv.onrender.com/adminStats"
-    );
-
+    const res = await fetch(`${API_BASE}/adminStats`);
     const stats = await res.json();
 
-    document.getElementById("totalStudents").innerText =
-        stats.totalStudents;
-
-    document.getElementById("totalStaff").innerText =
-        stats.totalStaff;
-
-    document.getElementById("avgAttendance").innerText =
-        stats.avgAttendance + "%";
+    totalStudents.innerText = stats.totalStudents;
+    totalStaff.innerText = stats.totalStaff;
+    avgAttendance.innerText = stats.avgAttendance + "%";
 }
 </script>
 

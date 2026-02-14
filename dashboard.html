@@ -147,12 +147,11 @@ checkAccess("student");
     </a>
   </div>
 
-<!-- Marks Chart -->
-<div class="profile-box mt-4">
-  <h4>Marks Performance</h4>
-  <canvas id="marksChart"></canvas>
-</div>
-
+  <!-- Marks Chart -->
+  <div class="profile-box mt-4">
+    <h4>Marks Performance</h4>
+    <canvas id="marksChart"></canvas>
+  </div>
 
 </div>
 
@@ -160,58 +159,66 @@ checkAccess("student");
 async function loadDashboard() {
   const user = JSON.parse(localStorage.getItem("user"));
 
-  const res = await fetch(
-    `https://backend-deployment-1-5kgv.onrender.com/student/${user.studentId || user.id}`
-  );
+  try {
+    const res = await fetch(
+      `https://backend-deployment-1-5kgv.onrender.com/student/${user.studentId || user.id}`
+    );
 
-  const data = await res.json();
+    const data = await res.json();
 
-  document.getElementById("name").innerText = data.name;
-  document.getElementById("attendance").innerText = data.attendance;
-  document.getElementById("attBox").innerText = data.attendance;
+    if (!data) return;
 
-  let marks = data.marks || {};
-  let subjects = Object.keys(marks);
-  let values = Object.values(marks);
+    document.getElementById("name").innerText = data.name;
+    document.getElementById("attendance").innerText = data.attendance;
+    document.getElementById("attBox").innerText = data.attendance;
 
-  document.getElementById("subBox").innerText = subjects.length;
+    let marks = data.marks ?? {};
+    let subjects = Object.keys(marks);
+    let values = Object.values(marks).map(v => Number(v));
 
-  let avg = 0;
-  if (subjects.length > 0) {
-    let total = values.reduce((a, v) => a + Number(v), 0);
-    avg = Math.round(total / subjects.length);
-  }
+    document.getElementById("subBox").innerText = subjects.length;
 
-  document.getElementById("avgBox").innerText = avg;
-
-  // ===== Marks Chart =====
-  const ctx = document.getElementById("marksChart").getContext("2d");
-
-  new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels: subjects,
-      datasets: [{
-        label: "Marks",
-        data: values,
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      scales: {
-        y: {
-          beginAtZero: true,
-          max: 100
-        }
-      }
+    let avg = 0;
+    if (subjects.length > 0) {
+      let total = values.reduce((a, v) => a + v, 0);
+      avg = Math.round(total / subjects.length);
     }
-  });
+
+    document.getElementById("avgBox").innerText = avg;
+
+    /* ---- Chart ---- */
+    if (subjects.length > 0) {
+      const ctx = document.getElementById("marksChart");
+
+      new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: subjects,
+          datasets: [{
+            label: "Marks",
+            data: values,
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100
+            }
+          }
+        }
+      });
+    }
+
+  } catch (err) {
+    console.log("Dashboard load failed");
+  }
 }
 
 loadDashboard();
 </script>
-
 
 </body>
 </html>

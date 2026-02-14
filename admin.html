@@ -70,62 +70,82 @@ window.onload = function () {
     <h3 class="mt-4">All Students</h3>
 
     <input
-  type="text"
-  id="searchInput"
-  class="form-control mb-3"
-  placeholder="Search student by name..."
-  onkeyup="searchStudent()"
-/>
+        type="text"
+        id="searchInput"
+        class="form-control mb-3"
+        placeholder="Search student by name..."
+        onkeyup="searchStudent()"
+    />
 
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Attendance</th>
+                    <th>Marks</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
 
-<div class="table-responsive">
- <table class="table table-bordered">
+            <tbody id="studentTable"></tbody>
+        </table>
+    </div>
 
-<thead>
-<tr>
-<th>ID</th>
-<th>Name</th>
-<th>Attendance</th>
-<th>Marks</th>
-<th>Action</th>
-</tr>
-</thead>
-
-    <tbody id="studentTable"></tbody>
-    </table>
-</div>
 </div>
 
 <script>
-async function createStaff() {
-    const username = document.getElementById("staffUsername").value;
-    const password = document.getElementById("staffPassword").value;
+let allStudents = [];
 
-    const res = await fetch("https://backend-deployment-1-5kgv.onrender.com/createStaff", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password })
-    });
+/* ---------- Create Staff ---------- */
+async function createStaff() {
+    const username = document.getElementById("staffUsername").value.trim();
+    const password = document.getElementById("staffPassword").value.trim();
+
+    if (!username || !password) {
+        alert("Enter username and password");
+        return;
+    }
+
+    const res = await fetch(
+        "https://backend-deployment-1-5kgv.onrender.com/createStaff",
+        {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password })
+        }
+    );
 
     const data = await res.json();
     document.getElementById("msg").innerText = data.message;
+
+    document.getElementById("staffUsername").value = "";
+    document.getElementById("staffPassword").value = "";
 }
 
-let allStudents = [];
-
+/* ---------- Load Students ---------- */
 async function loadStudents() {
-    const res = await fetch("https://backend-deployment-1-5kgv.onrender.com/students");
-    allStudents = await res.json();
+    const res = await fetch(
+        "https://backend-deployment-1-5kgv.onrender.com/students"
+    );
 
+    if (!res.ok) {
+        alert("Failed to load students");
+        return;
+    }
+
+    allStudents = await res.json();
     displayStudents(allStudents);
 }
 
+/* ---------- Display Students ---------- */
 function displayStudents(students) {
     const table = document.getElementById("studentTable");
     table.innerHTML = "";
 
     students.forEach(s => {
-        const marksText = Object.entries(s.marks || {})
+        const marksText = Object.entries(s.marks ?? {})
             .map(([sub, m]) => `${sub}: ${m}`)
             .join(", ");
 
@@ -145,20 +165,20 @@ function displayStudents(students) {
     });
 }
 
-
+/* ---------- Delete Student ---------- */
 async function deleteStudent(id) {
-
     if (!confirm("Delete this student?")) return;
 
-    await fetch(`https://backend-deployment-1-5kgv.onrender.com/deleteStudent/${id}`, {
-        method: "DELETE"
-    });
+    await fetch(
+        `https://backend-deployment-1-5kgv.onrender.com/deleteStudent/${id}`,
+        { method: "DELETE" }
+    );
 
     loadStudents();
     loadStats();
 }
 
-
+/* ---------- Search ---------- */
 function searchStudent() {
     const value = document
         .getElementById("searchInput")
@@ -172,9 +192,12 @@ function searchStudent() {
     displayStudents(filtered);
 }
 
-
+/* ---------- Admin Stats ---------- */
 async function loadStats() {
-    const res = await fetch("https://backend-deployment-1-5kgv.onrender.com/adminStats");
+    const res = await fetch(
+        "https://backend-deployment-1-5kgv.onrender.com/adminStats"
+    );
+
     const stats = await res.json();
 
     document.getElementById("totalStudents").innerText =

@@ -171,19 +171,11 @@ async function uploadCSV() {
 /*********************************
  UPDATE MARKS & ATTENDANCE
 **********************************/
-async function updateMarks() {
-  const usernameEl = document.getElementById("username");
-  const attendanceEl = document.getElementById("attendance");
-  const subjectEl = document.getElementById("subject");
-  const marksEl = document.getElementById("marks");
-  const msgBox = document.getElementById("msg");
-
-  if (!usernameEl) return;
-
-  const username = usernameEl.value.trim();
-  const attendance = attendanceEl?.value.trim() || "";
-  const subject = subjectEl?.value.trim() || "";
-  const marks = marksEl?.value.trim() || "";
+async function updateStudent() {
+  const username = document.getElementById("username").value.trim();
+  const attendance = document.getElementById("attendance").value.trim();
+  const subject = document.getElementById("subject").value.trim();
+  const marks = document.getElementById("marks").value.trim();
 
   if (!username) {
     alert("Enter student username");
@@ -204,16 +196,17 @@ async function updateMarks() {
 
     const data = await res.json();
 
-    if (msgBox)
-      msgBox.innerText = data.message;
+    document.getElementById("msg").innerText =
+      data.message || "Updated";
 
-    if (subjectEl) subjectEl.value = "";
-    if (marksEl) marksEl.value = "";
+    document.getElementById("subject").value = "";
+    document.getElementById("marks").value = "";
 
   } catch {
     alert("Update failed");
   }
 }
+
 
 /*********************************
  ROLE ACCESS GUARD

@@ -1,11 +1,11 @@
-/* ================================
-   Backend API Base URL
-================================ */
+/*********************************
+ Backend API Base URL
+**********************************/
 const API_BASE = "https://backend-deployment-11.onrender.com";
 
-/* ================================
-   LOGIN
-================================ */
+/*********************************
+ LOGIN
+**********************************/
 async function login() {
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value.trim();
@@ -43,17 +43,17 @@ async function login() {
   }
 }
 
-/* ================================
-   LOGOUT
-================================ */
+/*********************************
+ LOGOUT
+**********************************/
 function logout() {
   localStorage.removeItem("user");
   window.location.href = "login.html";
 }
 
-/* ================================
-   REGISTER
-================================ */
+/*********************************
+ REGISTER
+**********************************/
 async function register() {
   const name = document.getElementById("name").value.trim();
   const username = document.getElementById("username").value.trim();
@@ -85,28 +85,32 @@ async function register() {
   }
 }
 
-/* ================================
-   LOAD STUDENT DASHBOARD DATA
-================================ */
+/*********************************
+ LOAD STUDENT DASHBOARD DATA
+**********************************/
 async function loadStudent() {
   const user = JSON.parse(localStorage.getItem("user"));
   if (!user) return;
 
   try {
-    const res = await fetch(`${API_BASE}/student/${user.studentid}`);
+    const res = await fetch(
+      `${API_BASE}/student/${user.studentid || user.studentId}`
+    );
+
     const data = await res.json();
 
     const nameBox = document.getElementById("studentName");
-    if (nameBox) nameBox.innerText = data.name;
+    if (nameBox && data)
+      nameBox.innerText = data.name;
 
   } catch (err) {
     console.log(err);
   }
 }
 
-/* ================================
-   LOAD STUDENTS (ADMIN PANEL)
-================================ */
+/*********************************
+ LOAD STUDENTS (ADMIN/STAFF)
+**********************************/
 async function loadStudents() {
   const table = document.getElementById("studentsTable");
   if (!table) return;
@@ -131,9 +135,9 @@ async function loadStudents() {
   }
 }
 
-/* ================================
-   CSV Upload
-================================ */
+/*********************************
+ CSV Upload
+**********************************/
 async function uploadCSV() {
   const fileInput = document.getElementById("csvFile");
   if (!fileInput) return;
@@ -156,16 +160,64 @@ async function uploadCSV() {
     const data = await res.json();
     const msgBox = document.getElementById("uploadMsg");
 
-    if (msgBox) msgBox.innerText = data.message;
+    if (msgBox)
+      msgBox.innerText = data.message;
 
   } catch {
     alert("Upload failed");
   }
 }
 
-/* ================================
-   ROLE ACCESS GUARD
-================================ */
+/*********************************
+ UPDATE MARKS & ATTENDANCE
+**********************************/
+async function updateMarks() {
+  const usernameEl = document.getElementById("username");
+  const attendanceEl = document.getElementById("attendance");
+  const subjectEl = document.getElementById("subject");
+  const marksEl = document.getElementById("marks");
+  const msgBox = document.getElementById("msg");
+
+  if (!usernameEl) return;
+
+  const username = usernameEl.value.trim();
+  const attendance = attendanceEl?.value.trim() || "";
+  const subject = subjectEl?.value.trim() || "";
+  const marks = marksEl?.value.trim() || "";
+
+  if (!username) {
+    alert("Enter student username");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/updateByUsername`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username,
+        attendance,
+        subject,
+        marks
+      })
+    });
+
+    const data = await res.json();
+
+    if (msgBox)
+      msgBox.innerText = data.message;
+
+    if (subjectEl) subjectEl.value = "";
+    if (marksEl) marksEl.value = "";
+
+  } catch {
+    alert("Update failed");
+  }
+}
+
+/*********************************
+ ROLE ACCESS GUARD
+**********************************/
 function checkAccess(requiredRole) {
   const user = JSON.parse(localStorage.getItem("user"));
 

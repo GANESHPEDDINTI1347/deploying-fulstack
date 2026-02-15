@@ -23,17 +23,14 @@
 
 <body>
 
-<!-- Common script -->
 <script src="script.js"></script>
 
-<!-- Role Protection -->
 <script>
 window.onload = function () {
     checkAccess("staff");
 };
 </script>
 
-<!-- Navbar -->
 <nav class="navbar navbar-dark bg-dark">
     <div class="container-fluid">
         <span class="navbar-brand">Staff Panel</span>
@@ -43,7 +40,6 @@ window.onload = function () {
     </div>
 </nav>
 
-<!-- Staff Panel -->
 <div class="container mt-5 mb-5">
 
     <div class="card shadow p-4 staff-card">
@@ -70,7 +66,6 @@ window.onload = function () {
 
         <hr class="my-4">
 
-        <!-- CSV Upload -->
         <h4>Upload Students CSV</h4>
 
         <input type="file" id="csvFile"
@@ -88,6 +83,8 @@ window.onload = function () {
 </div>
 
 <script>
+const API_BASE = "https://backend-deployment-11.onrender.com";
+
 async function updateStudent() {
     const username = document.getElementById("username").value.trim();
     const attendance = document.getElementById("attendance").value.trim();
@@ -100,22 +97,23 @@ async function updateStudent() {
     }
 
     try {
-        const res = await fetch(
-            "https://backend-deployment-11.onrender.com/updateByUsername",
-            {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    username,
-                    attendance,
-                    subject,
-                    marks
-                })
-            }
-        );
+        const res = await fetch(`${API_BASE}/updateByUsername`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                username,
+                attendance,
+                subject,
+                marks
+            })
+        });
 
         const data = await res.json();
         document.getElementById("msg").innerText = data.message;
+
+        // clear fields
+        document.getElementById("subject").value = "";
+        document.getElementById("marks").value = "";
 
     } catch {
         alert("Update failed");

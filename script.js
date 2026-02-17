@@ -7,33 +7,39 @@ const API_BASE = "https://backend-deployment-11.onrender.com";
  LOGIN
 **********************************/
 app.post("/login", async (req, res) => {
-  const username = req.body.username.trim().toLowerCase();
-  const password = req.body.password;
+  try {
+    const username = req.body.username.trim().toLowerCase();
+    const password = req.body.password;
 
-  const result = await pool.query(
-    "SELECT id, username, password, role, studentid FROM users WHERE username=$1",
-    [username]
-  );
+    const result = await pool.query(
+      "SELECT * FROM users WHERE username=$1",
+      [username]
+    );
 
-  if (!result.rows.length)
-    return res.json({ success: false });
+    if (!result.rows.length)
+      return res.json({ success: false });
 
-  const user = result.rows[0];
-  const valid = await bcrypt.compare(password, user.password);
+    const user = result.rows[0];
 
-  if (!valid)
-    return res.json({ success: false });
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid)
+      return res.json({ success: false });
 
-  // send only required data
-  res.json({
-    success: true,
-    user: {
-      id: user.id,
-      username: user.username,
-      role: user.role,
-      studentid: user.studentid
-    }
-  });
+    // send safe user object
+    res.json({
+      success: true,
+      user: {
+        id: user.id,
+        username: user.username,
+        role: user.role,
+        studentid: user.studentid
+      }
+    });
+
+  } catch (err) {
+    console.log("LOGIN ERROR:", err);
+    res.json({ success: false });
+  }
 });
 
 

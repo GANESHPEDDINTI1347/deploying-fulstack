@@ -224,3 +224,4 @@ function checkAccess(requiredRole) {
     window.location.href = "login.html";
   }
 }
+

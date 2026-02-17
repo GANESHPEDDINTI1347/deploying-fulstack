@@ -118,13 +118,11 @@ Logout
 <script>
 async function loadProfile() {
     const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) return;
 
-    if (!user || !user.studentid) return;
+    const sid = user.studentid || user.studentId || user.id;
 
-    const res = await fetch(
-        `${API_BASE}/student/${user.studentid}`
-    );
-
+    const res = await fetch(`${API_BASE}/student/${sid}`);
     const data = await res.json();
     if (!data) return;
 
@@ -139,7 +137,7 @@ async function loadProfile() {
     document.getElementById("address").innerText = data.address || "-";
 
     document.getElementById("attendance").innerText =
-        (data.attendance || "0") + "%";
+        data.attendance || "-";
 
     const marksList = document.getElementById("marks");
     marksList.innerHTML = "";
@@ -161,5 +159,7 @@ async function loadProfile() {
 }
 </script>
 
+</body>
+</html>
 </body>
 </html>

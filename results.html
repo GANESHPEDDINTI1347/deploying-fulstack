@@ -29,11 +29,9 @@ checkAccess("student");
 <script>
 async function loadResults() {
   const user = JSON.parse(localStorage.getItem("user"));
+  const id = user.studentid || user.studentId || user.id;
 
-  const res = await fetch(
-    `https://backend-deployment-1-5kgv.onrender.com/student/${user.studentid || user.id}`
-  );
-
+  const res = await fetch(`${API_BASE}/student/${id}`);
   const data = await res.json();
 
   const list = document.getElementById("marksList");

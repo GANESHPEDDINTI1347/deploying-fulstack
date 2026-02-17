@@ -8,7 +8,7 @@ const API_BASE = "https://backend-deployment-11.onrender.com";
 **********************************/
 app.post("/login", async (req, res) => {
   try {
-    const username = req.body.username.trim().toLowerCase();
+    const username = req.body.username.toLowerCase().trim();
     const password = req.body.password;
 
     const result = await pool.query(
@@ -16,16 +16,18 @@ app.post("/login", async (req, res) => {
       [username]
     );
 
-    if (!result.rows.length)
+    if (result.rows.length === 0) {
       return res.json({ success: false });
+    }
 
     const user = result.rows[0];
 
-    const valid = await bcrypt.compare(password, user.password);
-    if (!valid)
-      return res.json({ success: false });
+    const match = await bcrypt.compare(password, user.password);
 
-    // send safe user object
+    if (!match) {
+      return res.json({ success: false });
+    }
+
     res.json({
       success: true,
       user: {

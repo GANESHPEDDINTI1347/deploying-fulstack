@@ -6,42 +6,36 @@ const API_BASE = "https://backend-deployment-11.onrender.com";
 /*********************************
  LOGIN
 **********************************/
-async function login() {
-  const username = document.getElementById("username").value.trim();
-  const password = document.getElementById("password").value.trim();
+app.post("/login", async (req, res) => {
+  const username = req.body.username.trim().toLowerCase();
+  const password = req.body.password;
 
-  if (!username || !password) {
-    alert("Enter username and password");
-    return;
-  }
+  const result = await pool.query(
+    "SELECT id, username, password, role, studentid FROM users WHERE username=$1",
+    [username]
+  );
 
-  try {
-    const res = await fetch(`${API_BASE}/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password })
-    });
+  if (!result.rows.length)
+    return res.json({ success: false });
 
-    const data = await res.json();
+  const user = result.rows[0];
+  const valid = await bcrypt.compare(password, user.password);
 
-    if (!data.success) {
-      alert("Invalid login");
-      return;
+  if (!valid)
+    return res.json({ success: false });
+
+  // send only required data
+  res.json({
+    success: true,
+    user: {
+      id: user.id,
+      username: user.username,
+      role: user.role,
+      studentid: user.studentid
     }
+  });
+});
 
-    localStorage.setItem("user", JSON.stringify(data.user));
-
-    if (data.user.role === "staff")
-      window.location.href = "staff.html";
-    else if (data.user.role === "admin")
-      window.location.href = "admin.html";
-    else
-      window.location.href = "dashboard.html";
-
-  } catch {
-    alert("Server error. Try again later.");
-  }
-}
 
 /*********************************
  LOGOUT

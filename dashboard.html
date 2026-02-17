@@ -153,6 +153,8 @@ checkAccess("student");
 </div>
 
 <script>
+let chartInstance = null;
+
 async function loadDashboard() {
   try {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -161,11 +163,8 @@ async function loadDashboard() {
     const sid = user.studentid || user.studentId;
     if (!sid) return;
 
-    // Wake backend if sleeping
-    await fetch("https://backend-deployment-11.onrender.com/test");
-
     const res = await fetch(
-      `https://backend-deployment-11.onrender.com/student/${sid}`
+      `https://backend-deployment-1-5kgv.onrender.com/student/${sid}`
     );
 
     if (!res.ok) return;
@@ -174,8 +173,8 @@ async function loadDashboard() {
     if (!data) return;
 
     document.getElementById("name").innerText = data.name || "";
-    document.getElementById("attendance").innerText = data.attendance || "";
-    document.getElementById("attBox").innerText = data.attendance || "--";
+    document.getElementById("attendance").innerText = data.attendance || "0%";
+    document.getElementById("attBox").innerText = data.attendance || "0%";
 
     const marks = data.marks || {};
     const subjects = Object.keys(marks);
@@ -185,17 +184,19 @@ async function loadDashboard() {
 
     let avg = 0;
     if (subjects.length > 0) {
-      avg = Math.round(
-        values.reduce((a, v) => a + v, 0) / subjects.length
-      );
+      avg = Math.round(values.reduce((a, v) => a + v, 0) / subjects.length);
     }
 
     document.getElementById("avgBox").innerText = avg;
 
-    if (subjects.length > 0) {
-      const ctx = document.getElementById("marksChart");
+    if (chartInstance) {
+      chartInstance.destroy();
+    }
 
-      new Chart(ctx, {
+    if (subjects.length > 0) {
+      const ctx = document.getElementById("marksChart").getContext("2d");
+
+      chartInstance = new Chart(ctx, {
         type: "bar",
         data: {
           labels: subjects,
@@ -208,7 +209,10 @@ async function loadDashboard() {
         options: {
           responsive: true,
           scales: {
-            y: { beginAtZero: true, max: 100 }
+            y: {
+              beginAtZero: true,
+              max: 100
+            }
           }
         }
       });

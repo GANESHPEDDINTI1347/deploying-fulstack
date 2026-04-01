@@ -1,7 +1,7 @@
 /*********************************
  Backend API Base URL
 **********************************/
-const API_BASE = "https://backend-deployment-11.onrender.com";
+const API_BASE = "https://backend-deployment-3-35it.onrender.com";
 
 /*********************************
  LOGIN

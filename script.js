@@ -156,19 +156,24 @@ async function uploadCSV() {
   formData.append("file", file);
 
   try {
-    const res = await fetch(`${API_BASE}/uploadStudents`, {
+    const res = await fetch(`${API_BASE}/uploadStudentsSimple`, {
       method: "POST",
       body: formData
     });
 
     const data = await res.json();
+
+    console.log("UPLOAD RESPONSE:", data); // debug
+
     const msgBox = document.getElementById("uploadMsg");
 
-    if (msgBox)
-      msgBox.innerText = data.message;
+    if (msgBox) {
+      msgBox.innerText = data.message || "Upload completed";
+    }
 
-  } catch {
-    alert("Upload failed");
+  } catch (err) {
+    console.error("UPLOAD ERROR:", err);
+    alert("Upload failed. Check console.");
   }
 }
 
